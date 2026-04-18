@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Tools — Inbouncy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital@0;1&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --teal: #0B2A3C;
+    --coral: #E05A33;
+    --light: #F5F6F8;
+    --white: #FFFFFF;
+    --muted: #8FA3AE;
+    --border: rgba(11,42,60,0.1);
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--light);
+    color: var(--teal);
+    font-family: 'Outfit', sans-serif;
+    overflow: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* Diagonal accent block */
+  .accent-block {
+    position: fixed;
+    bottom: -80px;
+    right: -80px;
+    width: 480px;
+    height: 480px;
+    background: var(--teal);
+    border-radius: 50%;
+    opacity: 0.06;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 40px 56px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.1s forwards;
+  }
+  .logo {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--teal);
+    text-decoration: none;
+    letter-spacing: -0.3px;
+  }
+  .logo span { color: var(--coral); }
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--coral);
+    background: rgba(224,90,51,0.1);
+    border: 1px solid rgba(224,90,51,0.25);
+    padding: 5px 12px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+
+  /* Main */
+  main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 28px;
+  }
+
+  .mono-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--coral);
+    letter-spacing: 1px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.3s forwards;
+  }
+
+  h1 {
+    font-weight: 700;
+    font-size: clamp(42px, 6vw, 80px);
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--teal);
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.4s forwards;
+  }
+  h1 .highlight {
+    color: var(--coral);
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  .description {
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--muted);
+    max-width: 500px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.55s forwards;
+  }
+
+  /* Tool preview cards */
+  .tool-cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.7s forwards;
+  }
+  .tool-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--teal);
+    box-shadow: 0 2px 12px rgba(11,42,60,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(11,42,60,0.1);
+  }
+  .tool-card .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--coral);
+    opacity: 0.5;
+  }
+  .tool-card.soon .dot { background: var(--muted); }
+  .tool-card.soon { color: var(--muted); }
+  .coming-soon-chip {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    background: var(--light);
+    color: var(--muted);
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.85s forwards;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--teal);
+    color: var(--white);
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    text-decoration: none;
+    padding: 13px 26px;
+    border-radius: 4px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn:hover { background: #0d3347; transform: translateY(-1px); }
+  .link {
+    font-size: 14px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-weight: 300;
+  }
+  .link:hover { color: var(--teal); }
+
+  /* Footer */
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 1s forwards;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+  .footer-note { font-size: 12px; color: var(--muted); font-weight: 300; }
+  .footer-link { font-size: 12px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-link:hover { color: var(--coral); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    .wrapper { padding: 28px 24px; overflow: hidden; }
+    h1 { letter-spacing: -1.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="accent-block"></div>
+
+<div class="wrapper">
+  <header>
+    <a href="https://inbouncy.com" class="logo">Inbouncy<span>.</span></a>
+    <span class="tag">AI_TOOLS</span>
+  </header>
+
+  <main>
+    <div class="mono-label">// tools.inbouncy.app — launching soon</div>
+    <h1>Marketing tools,<br/><span class="highlight">powered by AI.</span></h1>
+    <p class="description">
+      Free AI-powered tools for marketers, agencies, and founders. Built to save time, surface insights, and make better decisions faster.
+    </p>
+
+    <div class="tool-cards">
+      <div class="tool-card">
+        <div class="dot"></div>
+        ROI Calculator
+        <span class="coming-soon-chip">SOON</span>
+      </div>
+      <div class="tool-card soon">
+        <div class="dot"></div>
+        SEO Audit Grader
+        <span class="coming-soon-chip">SOON</span>
+      </div>
+      <div class="tool-card soon">
+        <div class="dot"></div>
+        HubSpot Health Score
+        <span class="coming-soon-chip">SOON</span>
+      </div>
+      <div class="tool-card soon">
+        <div class="dot"></div>
+        Ad Spend Analyzer
+        <span class="coming-soon-chip">SOON</span>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a href="https://inbouncy.com/meetings/grow-better/meet-with-ebarak" class="btn">
+        Get Early Access →
+      </a>
+      <a href="https://inbouncy.com" class="link">Back to inbouncy.com</a>
+    </div>
+  </main>
+
+  <footer>
+    <span class="footer-note">© 2025 Inbouncy LLC — AI-First Inbound Marketing</span>
+    <a href="mailto:ebarak@inbouncy.com" class="footer-link">ebarak@inbouncy.com</a>
+  </footer>
+</div>
+</body>
+</html>
